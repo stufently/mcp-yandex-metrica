@@ -63,13 +63,24 @@ export const getReportSchema = z.object({
     .string()
     .optional()
     .describe("Preset report name (e.g. 'sources_summary'). Overrides metrics/dimensions."),
-  // Comparison period — same /stat/v1/data endpoint, extra params
-  date1b: dateString
+  // Comparison period — uses /stat/v1/data/comparison endpoint when provided
+  date1_b: dateString
     .optional()
     .describe(
-      "Comparison period start date. Provide together with date2b to compare two periods in one report.",
+      "Comparison segment B start date. When provided with date2_b, uses the comparison endpoint " +
+        "(/stat/v1/data/comparison). date1/date2 become segment A. Each row returns two sets of metrics.",
     ),
-  date2b: dateString
+  date2_b: dateString
     .optional()
-    .describe("Comparison period end date. Provide together with date1b."),
+    .describe(
+      "Comparison segment B end date. Must be provided together with date1_b.",
+    ),
+  filters_a: z
+    .string()
+    .optional()
+    .describe("Segmentation filter for segment A only (comparison mode)"),
+  filters_b: z
+    .string()
+    .optional()
+    .describe("Segmentation filter for segment B only (comparison mode)"),
 });

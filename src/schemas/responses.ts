@@ -63,6 +63,21 @@ export const reportResponseSchema = z
   })
   .passthrough();
 
+const comparisonRowSchema = z
+  .object({
+    dimensions: z.array(dimensionValueSchema),
+    metrics: z.array(z.array(z.number())),
+  })
+  .passthrough();
+
+export const comparisonResponseSchema = z
+  .object({
+    query: z.object({}).passthrough(),
+    data: z.array(comparisonRowSchema),
+    total_rows: z.number(),
+  })
+  .passthrough();
+
 const logRequestPartSchema = z
   .object({
     part_number: z.number(),
@@ -79,6 +94,7 @@ const logRequestSchema = z
     date2: z.string(),
     fields: z.array(z.string()),
     status: z.string(),
+    log_request_parts: z.array(logRequestPartSchema).optional(),
   })
   .passthrough();
 

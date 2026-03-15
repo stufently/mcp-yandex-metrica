@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
 import { createManagementClient } from "../../src/client/management.js";
 import { loadConfig } from "../../src/config/env.js";
 import { fixtureCounterResponse, fixtureGoalsResponse, FIXTURE_COUNTER_ID } from "../fixtures/index.js";

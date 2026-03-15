@@ -1,7 +1,11 @@
 import { createHttpClient } from "./http.js";
 import type { Config } from "../config/env.js";
 import type { ReportResponse } from "../types/api.js";
-import { reportResponseSchema, validateResponse } from "../schemas/responses.js";
+import {
+  reportResponseSchema,
+  comparisonResponseSchema,
+  validateResponse,
+} from "../schemas/responses.js";
 
 export interface GetReportParams {
   ids: string;
@@ -18,8 +22,25 @@ export interface GetReportParams {
   attribution?: string | undefined;
   lang?: string | undefined;
   include_undefined?: boolean | undefined;
-  date1b?: string | undefined;
-  date2b?: string | undefined;
+  preset?: string | undefined;
+}
+
+export interface GetComparisonParams {
+  ids: string;
+  metrics: string;
+  dimensions?: string | undefined;
+  date1_a?: string | undefined;
+  date2_a?: string | undefined;
+  date1_b?: string | undefined;
+  date2_b?: string | undefined;
+  filters?: string | undefined;
+  filters_a?: string | undefined;
+  filters_b?: string | undefined;
+  sort?: string | undefined;
+  limit?: number | undefined;
+  offset?: number | undefined;
+  accuracy?: string | undefined;
+  lang?: string | undefined;
   preset?: string | undefined;
 }
 
@@ -42,12 +63,32 @@ export function createReportingClient(config: Config) {
       attribution: params.attribution,
       lang: params.lang,
       include_undefined: params.include_undefined,
-      date1b: params.date1b,
-      date2b: params.date2b,
       preset: params.preset,
     });
     return validateResponse(reportResponseSchema, raw, "getReport") as unknown as ReportResponse;
   }
 
-  return { getReport };
+  async function getComparison(params: GetComparisonParams): Promise<unknown> {
+    const raw = await http.getJson<unknown>("/stat/v1/data/comparison", {
+      ids: params.ids,
+      metrics: params.metrics,
+      dimensions: params.dimensions,
+      date1_a: params.date1_a,
+      date2_a: params.date2_a,
+      date1_b: params.date1_b,
+      date2_b: params.date2_b,
+      filters: params.filters,
+      filters_a: params.filters_a,
+      filters_b: params.filters_b,
+      sort: params.sort,
+      limit: params.limit,
+      offset: params.offset,
+      accuracy: params.accuracy,
+      lang: params.lang,
+      preset: params.preset,
+    });
+    return validateResponse(comparisonResponseSchema, raw, "getComparison");
+  }
+
+  return { getReport, getComparison };
 }

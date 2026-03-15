@@ -101,7 +101,7 @@ export function createHttpClient(config: Config) {
     } catch (err) {
       if (err instanceof YandexApiError) throw err;
       if (err instanceof Error && err.name === "AbortError") {
-        throw new Error(`Request timed out after ${config.YANDEX_METRICA_TIMEOUT_MS}ms`);
+        throw new Error(`Request timed out after ${config.YANDEX_METRICA_TIMEOUT_MS}ms`, { cause: err });
       }
       throw err;
     } finally {
@@ -130,7 +130,8 @@ export function createHttpClient(config: Config) {
       } catch (err) {
         lastError = err;
 
-        if (err instanceof YandexApiError && RETRYABLE_STATUSES.has(err.status)) {
+        // Only retry GET requests — POST may not be idempotent (e.g. createLogsRequest)
+        if (method === "GET" && err instanceof YandexApiError && RETRYABLE_STATUSES.has(err.status)) {
           if (attempt < MAX_RETRIES) {
             const delay = err.retryAfter ?? backoffDelay(attempt);
             await sleep(delay);
