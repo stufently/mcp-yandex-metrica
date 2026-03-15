@@ -1,5 +1,14 @@
 # Tasks
 
+## Completed — 2026-03-15 (runtime validation)
+
+| Task | Status |
+|------|--------|
+| Create `src/schemas/responses.ts` with zod schemas and `validateResponse` helper | Done |
+| Update `management.ts` to validate all API responses via zod | Done |
+| Update `reporting.ts` to validate all API responses via zod | Done |
+| Update `logs.ts` to validate all API responses via zod | Done |
+
 ## Completed — 2026-03-15 (security/reliability patch)
 
 | Task | Status |

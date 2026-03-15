@@ -19,3 +19,4 @@
 - [x] Preview/full download modes
 - [x] Unit and integration tests
 - [x] Docker and CI
+- [x] Runtime zod response validation for all API clients
