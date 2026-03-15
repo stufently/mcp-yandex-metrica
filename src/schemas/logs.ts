@@ -25,9 +25,19 @@ export const createLogsRequestSchema = z.object({
     "Fields to export. See Yandex Metrica Logs API documentation for full field lists."
   ),
   attribution: z
-    .enum(["last", "first", "last_significant", "cross_device_last", "cross_device_first", "cross_device_last_significant"])
+    .enum([
+      "first",
+      "last",
+      "lastsign",
+      "last_yandex_direct_click",
+      "cross_device_first",
+      "cross_device_last",
+      "cross_device_last_significant",
+      "cross_device_last_yandex_direct_click",
+      "automatic",
+    ])
     .optional()
-    .describe("Attribution model for traffic source fields"),
+    .describe("Attribution model for traffic source fields. Default: lastsign."),
 });
 
 export const listLogsRequestsSchema = z.object({

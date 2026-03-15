@@ -40,6 +40,7 @@ export interface GetComparisonParams {
   limit?: number | undefined;
   offset?: number | undefined;
   accuracy?: string | undefined;
+  include_undefined?: boolean | undefined;
   lang?: string | undefined;
   preset?: string | undefined;
 }
@@ -84,6 +85,7 @@ export function createReportingClient(config: Config) {
       limit: params.limit,
       offset: params.offset,
       accuracy: params.accuracy,
+      include_undefined: params.include_undefined,
       lang: params.lang,
       preset: params.preset,
     });

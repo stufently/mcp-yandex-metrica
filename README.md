@@ -44,7 +44,7 @@ This MCP server exposes both APIs as named tools that an LLM can call directly.
 |------|-------------|
 | `yandex_metrica_get_report` | Run a Reporting API query |
 
-> For period comparison, pass `date1b`/`date2b` to `yandex_metrica_get_report`. No separate tool needed — the Reporting API uses the same `/stat/v1/data` endpoint.
+> For period comparison, pass `date1_b`/`date2_b` to `yandex_metrica_get_report`. The tool automatically routes to `/stat/v1/data/comparison`; `date1`/`date2` become segment A, `date1_b`/`date2_b` become segment B. Each result row returns `metrics: { a, b }`.
 
 ### Logs API (raw export)
 | Tool | Description |

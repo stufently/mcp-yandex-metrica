@@ -29,6 +29,15 @@ export function registerGetReport(server: McpServer, config: Config): void {
 
         // Route to comparison endpoint when segment B dates are provided
         if (args.date1_b || args.date2_b) {
+          if (!args.date1_b || !args.date2_b) {
+            return {
+              isError: true as const,
+              content: [{
+                type: "text" as const,
+                text: "Both date1_b and date2_b must be provided together for period comparison.",
+              }],
+            };
+          }
           const result = await client.getComparison({
             ids,
             metrics,
@@ -44,6 +53,7 @@ export function registerGetReport(server: McpServer, config: Config): void {
             limit: args.limit,
             offset: args.offset,
             accuracy: args.accuracy,
+            include_undefined: args.include_undefined,
             lang: args.lang,
             preset: args.preset,
           });

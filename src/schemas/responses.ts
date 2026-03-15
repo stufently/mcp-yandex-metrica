@@ -66,7 +66,8 @@ export const reportResponseSchema = z
 const comparisonRowSchema = z
   .object({
     dimensions: z.array(dimensionValueSchema),
-    metrics: z.array(z.array(z.number())),
+    // comparison endpoint returns metrics as { a: number[], b: number[] }, not number[][]
+    metrics: z.object({ a: z.array(z.number()), b: z.array(z.number()) }).passthrough(),
   })
   .passthrough();
 
