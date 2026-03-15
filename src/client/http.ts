@@ -36,10 +36,14 @@ function buildErrorMessage(body: YandexErrorBody, fallback: string): string {
 }
 
 function parseRetryAfter(response: Response): number | undefined {
-  const header = response.headers.get("Retry-After");
-  if (!header) return undefined;
-  const seconds = parseInt(header, 10);
-  return isNaN(seconds) ? undefined : seconds * 1000;
+  try {
+    const header = response.headers?.get("Retry-After");
+    if (!header) return undefined;
+    const seconds = parseInt(header, 10);
+    return isNaN(seconds) ? undefined : seconds * 1000;
+  } catch {
+    return undefined;
+  }
 }
 
 function sleep(ms: number): Promise<void> {
