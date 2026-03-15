@@ -16,6 +16,33 @@
 | Add `retryAfter` field to `YandexApiError` | Done |
 | Rewrite `http.ts`: SSRF guard, retry logic, `Retry-After` header | Done |
 
+## Completed — 2026-03-15 (open source cleanup)
+
+| Task | Status |
+|------|--------|
+| Fix tsconfig lib to include DOM types (fetch, URL, Response) | Done |
+| Fix CI: opt into Node.js 24 for GitHub Actions | Done |
+| Add CONTRIBUTING.md | Done |
+| Add SECURITY.md | Done |
+| Add GitHub issue templates | Done |
+| Update CHANGELOG.md to reflect all changes in 0.1.0 | Done |
+
+## Completed — 2026-03-15 (runtime validation)
+
+| Task | Status |
+|------|--------|
+| Create `src/schemas/responses.ts` with zod schemas and `validateResponse` helper | Done |
+| Update `management.ts` to validate all API responses via zod | Done |
+| Update `reporting.ts` to validate all API responses via zod | Done |
+| Update `logs.ts` to validate all API responses via zod | Done |
+
+## Completed — 2026-03-15 (security/reliability patch)
+
+| Task | Status |
+|------|--------|
+| Add `retryAfter` field to `YandexApiError` | Done |
+| Rewrite `http.ts`: SSRF guard, retry logic, `Retry-After` header | Done |
+
 ## Completed — 2026-03-15 (initial)
 
 | Task | Status |
@@ -31,8 +58,8 @@
 | Unit tests | Done |
 | Mock integration tests | Done |
 | Live test scaffolding | Done |
-| Dockerfile (multi-stage, node:22-alpine) | Done |
+| Dockerfile (multi-stage, node:24-alpine) | Done |
 | docker-compose.yml | Done |
 | GitHub Actions CI workflow | Done |
-| GitHub Actions Docker workflow | Done |
-| README.md | Done |
+| GitHub Actions Docker workflow (GHCR) | Done |
+| README.md with Claude Code setup | Done |
