@@ -16,7 +16,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:live": "LIVE_TESTS=1 vitest run tests/live",
+    "test:live": "LIVE_TESTS=1 vitest run --config vitest.live.config.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },

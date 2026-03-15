@@ -37,6 +37,8 @@ export function registerGetReport(server: McpServer, config: Config): void {
           lang: args.lang,
           include_undefined: args.include_undefined,
           preset: args.preset,
+          date1b: args.date1b,
+          date2b: args.date2b,
         });
         return { content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }] };
       } catch (error) {

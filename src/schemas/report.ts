@@ -63,4 +63,13 @@ export const getReportSchema = z.object({
     .string()
     .optional()
     .describe("Preset report name (e.g. 'sources_summary'). Overrides metrics/dimensions."),
+  // Comparison period — same /stat/v1/data endpoint, extra params
+  date1b: dateString
+    .optional()
+    .describe(
+      "Comparison period start date. Provide together with date2b to compare two periods in one report.",
+    ),
+  date2b: dateString
+    .optional()
+    .describe("Comparison period end date. Provide together with date1b."),
 });
