@@ -177,13 +177,16 @@ npm run format
 ## Docker
 
 ```bash
-# Build image
-docker build -t mcp-yandex-metrica .
-
-# Run (stdio-based — pipe input/output)
-docker run -i \
+# Use pre-built image from GHCR (updated on every push to main)
+docker run -i --rm \
   -e YANDEX_METRICA_TOKEN=your_token \
-  mcp-yandex-metrica
+  ghcr.io/stufently/mcp-yandex-metrica:main
+
+# Or build locally
+docker build -t mcp-yandex-metrica:local .
+docker run -i --rm \
+  -e YANDEX_METRICA_TOKEN=your_token \
+  mcp-yandex-metrica:local
 ```
 
 ## Docker Compose
@@ -204,21 +207,17 @@ There are two ways to register the server: via the `claude mcp add` command (qui
 
 ### Option 1 — claude mcp add (recommended)
 
-**Via Docker (no Node.js required locally):**
+No cloning required — uses the pre-built image from GitHub Container Registry:
 
 ```bash
-# Build the image first
-git clone https://github.com/stufently/mcp-yandex-metrica.git
-cd mcp-yandex-metrica
-docker build -t mcp-yandex-metrica:local .
-
-# Register globally in Claude Code
 claude mcp add yandex-metrica \
   --transport stdio \
   -- docker run -i --rm \
   -e YANDEX_METRICA_TOKEN=your_oauth_token_here \
-  mcp-yandex-metrica:local
+  ghcr.io/stufently/mcp-yandex-metrica:main
 ```
+
+The image is rebuilt and pushed to GHCR automatically on every push to `main` via GitHub Actions.
 
 **Via Node.js (after build):**
 
@@ -245,7 +244,7 @@ claude mcp add yandex-metrica \
       "args": [
         "run", "-i", "--rm",
         "-e", "YANDEX_METRICA_TOKEN=your_oauth_token_here",
-        "mcp-yandex-metrica:local"
+        "ghcr.io/stufently/mcp-yandex-metrica:main"
       ]
     }
   }
@@ -258,11 +257,12 @@ claude mcp add yandex-metrica \
 {
   "mcpServers": {
     "yandex-metrica": {
-      "command": "node",
-      "args": ["dist/index.js"],
-      "env": {
-        "YANDEX_METRICA_TOKEN": "${YANDEX_METRICA_TOKEN}"
-      }
+      "command": "docker",
+      "args": [
+        "run", "-i", "--rm",
+        "-e", "YANDEX_METRICA_TOKEN=your_oauth_token_here",
+        "ghcr.io/stufently/mcp-yandex-metrica:main"
+      ]
     }
   }
 }
