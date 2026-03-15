@@ -1,0 +1,13 @@
+services:
+  mcp-yandex-metrica:
+    build: .
+    image: mcp-yandex-metrica:local
+    container_name: mcp-yandex-metrica
+    environment:
+      YANDEX_METRICA_TOKEN: ${YANDEX_METRICA_TOKEN}
+      YANDEX_METRICA_TIMEOUT_MS: ${YANDEX_METRICA_TIMEOUT_MS:-30000}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      YANDEX_METRICA_USER_AGENT: ${YANDEX_METRICA_USER_AGENT:-mcp-yandex-metrica/0.1.0}
+    stdin_open: true
+    tty: false
+    restart: "no"
