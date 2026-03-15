@@ -1,5 +1,8 @@
 # TODO
 
+## Infrastructure
+- [ ] **April 2026**: Upgrade Docker base image and CI to Node 26 LTS once it releases (scheduled April 2026)
+
 ## v0.2.0 Candidates
 - [ ] Reporting API: drilldown endpoint (`/stat/v1/data/drilldown`)
 - [ ] Reporting API: bytime endpoint (`/stat/v1/data/bytime`)

@@ -24,7 +24,7 @@ This MCP server exposes both APIs as named tools that an LLM can call directly.
 - Minimal transformation — responses stay close to the Yandex API format
 - Safe download behavior: logs parts default to 50KB preview + metadata
 - Strict TypeScript, zod validation, clean error messages
-- Multi-stage Docker image (node:22-alpine)
+- Multi-stage Docker image (node:24-alpine)
 - Unit + mock integration tests, live test scaffolding
 - GitHub Actions CI and Docker workflows
 
@@ -89,13 +89,30 @@ Set `mode: "full"` to get the entire content — only do this for small parts.
 
 ## Requirements
 
-- Node.js 22+
+- Node.js 24+
 - Yandex OAuth token with `metrika:read` scope
 
-To get a token:
-1. Create an app at https://oauth.yandex.com/
-2. Grant `metrika:read` permission
-3. Authorize and copy the token
+### How to get YANDEX_METRICA_TOKEN
+
+1. Go to https://oauth.yandex.com/ → **Create app**
+2. Fill in any name, select **For API access**
+3. Under **Access** → enable `metrika:read`
+4. Click **Create app**, copy the **ClientID**
+5. Open in browser (replace `<ClientID>` with yours):
+   ```
+   https://oauth.yandex.com/authorize?response_type=token&client_id=<ClientID>
+   ```
+6. Authorize → copy the `access_token` from the URL fragment (`#access_token=...`)
+
+### How to get YANDEX_METRICA_COUNTER_ID
+
+The counter ID is the numeric ID of your Yandex Metrica tag (счётчик):
+
+- Open https://metrika.yandex.ru — the counter ID is shown next to each tag
+- Or look at the URL: `metrika.yandex.ru/dashboard?id=**12345678**`
+- Or use the tool itself: call `yandex_metrica_list_counters` — it returns all counters with their IDs
+
+> `YANDEX_METRICA_COUNTER_ID` is only needed for live tests (`npm run test:live`), not for normal server operation.
 
 ---
 
