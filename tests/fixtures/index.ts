@@ -94,6 +94,31 @@ export const fixtureEvaluationResponse: LogRequestEvaluationResponse = {
   },
 };
 
+export const fixtureComparisonResponse = {
+  query: {
+    ids: [FIXTURE_COUNTER_ID],
+    metrics: ["ym:s:visits"],
+    date1_a: "2024-01-01",
+    date2_a: "2024-01-07",
+    date1_b: "2023-01-01",
+    date2_b: "2023-01-07",
+    limit: 100,
+    offset: 1,
+  },
+  data: [
+    {
+      dimensions: [{ name: "Organic Search" }],
+      metrics: { a: [150], b: [120] },
+    },
+    {
+      dimensions: [{ name: "Direct" }],
+      metrics: { a: [80], b: [95] },
+    },
+  ],
+  total_rows: 2,
+  sampled: false,
+};
+
 export const fixtureTsvContent =
   "ym:s:visitID\tym:s:date\tym:s:clientID\n" +
   "111\t2024-01-01\tabc\n" +

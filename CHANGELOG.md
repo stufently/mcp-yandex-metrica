@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+### Fixed
+- ESLint: added Node.js/Web globals (`fetch`, `URL`, `AbortController`, `TextDecoder`, etc.) — lint now passes cleanly
+- HTTP client: POST requests no longer retried (only GET); prevents duplicate `createLogsRequest` on transient 5xx
+- Comparison endpoint: corrected to `/stat/v1/data/comparison` with `date1_a/date2_a/date1_b/date2_b` params
+- Comparison response schema: `metrics` is `{ a: number[], b: number[] }` not `number[][]`
+- Attribution enums: corrected to `lastsign`, added missing `last_yandex_direct_click`, `cross_device_last_yandex_direct_click`, `automatic`
+- Validation: error returned when only one of `date1_b`/`date2_b` is provided
+- `include_undefined` now forwarded in comparison mode
+- `logRequestPartSchema` used inside `logRequestSchema` (`log_request_parts` validated)
+- Error cause propagated in timeout error
+
+### Added
+- 5 new integration tests for `getComparison` (endpoint routing, param passing, `{a,b}` format, schema rejection, filters)
+- `fixtureComparisonResponse` with correct `metrics: { a, b }` format
+
 ## [0.1.0] - 2026-03-15
 
 ### Added
