@@ -119,7 +119,7 @@ The counter ID is the numeric ID of your Yandex Metrica tag (счётчик):
 ## Installation
 
 ```bash
-git clone https://github.com/your-org/mcp-yandex-metrica.git
+git clone https://github.com/stufently/mcp-yandex-metrica.git
 cd mcp-yandex-metrica
 npm install
 ```
@@ -200,41 +200,42 @@ docker-compose run --rm mcp-yandex-metrica
 
 ## Claude Code Configuration
 
-Add to your Claude Code MCP settings (e.g. `~/.claude/claude_desktop_config.json` or project `.mcp.json`):
+There are two ways to register the server: via the `claude mcp add` command (quickest) or by manually editing a config file.
 
-### Using Node directly (after npm install + build)
+### Option 1 — claude mcp add (recommended)
 
-```json
-{
-  "mcpServers": {
-    "yandex-metrica": {
-      "command": "node",
-      "args": ["/absolute/path/to/mcp-yandex-metrica/dist/index.js"],
-      "env": {
-        "YANDEX_METRICA_TOKEN": "your_oauth_token_here"
-      }
-    }
-  }
-}
+**Via Docker (no Node.js required locally):**
+
+```bash
+# Build the image first
+git clone https://github.com/stufently/mcp-yandex-metrica.git
+cd mcp-yandex-metrica
+docker build -t mcp-yandex-metrica:local .
+
+# Register globally in Claude Code
+claude mcp add yandex-metrica \
+  --transport stdio \
+  -- docker run -i --rm \
+  -e YANDEX_METRICA_TOKEN=your_oauth_token_here \
+  mcp-yandex-metrica:local
 ```
 
-### Using npx / tsx (development)
+**Via Node.js (after build):**
 
-```json
-{
-  "mcpServers": {
-    "yandex-metrica": {
-      "command": "npx",
-      "args": ["tsx", "/absolute/path/to/mcp-yandex-metrica/src/index.ts"],
-      "env": {
-        "YANDEX_METRICA_TOKEN": "your_oauth_token_here"
-      }
-    }
-  }
-}
+```bash
+git clone https://github.com/stufently/mcp-yandex-metrica.git
+cd mcp-yandex-metrica
+npm install && npm run build
+
+claude mcp add yandex-metrica \
+  --transport stdio \
+  -e YANDEX_METRICA_TOKEN=your_oauth_token_here \
+  -- node /absolute/path/to/mcp-yandex-metrica/dist/index.js
 ```
 
-### Using Docker
+### Option 2 — manual config file
+
+**Global scope** — edit `~/.claude.json`, find (or create) the `mcpServers` key:
 
 ```json
 {
@@ -249,6 +250,35 @@ Add to your Claude Code MCP settings (e.g. `~/.claude/claude_desktop_config.json
     }
   }
 }
+```
+
+**Project scope** — create `.mcp.json` in the project root (checked into git):
+
+```json
+{
+  "mcpServers": {
+    "yandex-metrica": {
+      "command": "node",
+      "args": ["dist/index.js"],
+      "env": {
+        "YANDEX_METRICA_TOKEN": "${YANDEX_METRICA_TOKEN}"
+      }
+    }
+  }
+}
+```
+
+### Verify it's working
+
+```bash
+claude mcp list            # should show yandex-metrica
+claude mcp get yandex-metrica  # shows full config
+```
+
+Then in a Claude Code session just ask:
+
+```
+List all my Yandex Metrica counters.
 ```
 
 ---
@@ -303,8 +333,8 @@ src/
 - **No comparison report tool** — use `yandex_metrica_get_report` with `date1b`/`date2b` params
 - **No drilldown/pivot/bytime tools** in v1 — planned for v0.2
 - **No caching** — every tool call hits the Yandex API
-- **No retry logic** beyond the default fetch behavior
 - **Large log parts** — use `mode: "full"` carefully; defaults to 50KB preview
+- Retry with exponential backoff is built-in (3 retries, statuses 429/500/502/503/504)
 
 ---
 
