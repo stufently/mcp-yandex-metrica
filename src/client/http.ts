@@ -4,6 +4,14 @@ import type { Config } from "../config/env.js";
 
 export type Params = Record<string, string | number | boolean | undefined>;
 
+const YANDEX_API_HOST = "api-metrika.yandex.net";
+
+// Retryable HTTP status codes
+const RETRYABLE_STATUSES = new Set([429, 500, 502, 503, 504]);
+const MAX_RETRIES = 3;
+const BASE_DELAY_MS = 1000;
+const MAX_DELAY_MS = 30_000;
+
 interface YandexErrorBody {
   message?: string;
   code?: string;
@@ -27,6 +35,36 @@ function buildErrorMessage(body: YandexErrorBody, fallback: string): string {
   return fallback;
 }
 
+function parseRetryAfter(response: Response): number | undefined {
+  const header = response.headers.get("Retry-After");
+  if (!header) return undefined;
+  const seconds = parseInt(header, 10);
+  return isNaN(seconds) ? undefined : seconds * 1000;
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function backoffDelay(attempt: number): number {
+  const jitter = Math.random() * 200;
+  return Math.min(BASE_DELAY_MS * Math.pow(2, attempt) + jitter, MAX_DELAY_MS);
+}
+
+/**
+ * Guards against SSRF: ensures the auth token is only sent to the official Yandex API host.
+ * In test environments (NODE_ENV=test), this check is skipped to allow mock servers.
+ */
+function assertSafeHost(url: URL): void {
+  if (process.env["NODE_ENV"] === "test") return;
+  if (url.hostname !== YANDEX_API_HOST) {
+    throw new Error(
+      `Authorization blocked: refusing to send token to non-Yandex host '${url.hostname}'. ` +
+        `YANDEX_METRICA_BASE_URL must point to ${YANDEX_API_HOST}.`,
+    );
+  }
+}
+
 export function createHttpClient(config: Config) {
   const baseHeaders: Record<string, string> = {
     Authorization: `OAuth ${config.YANDEX_METRICA_TOKEN}`,
@@ -34,18 +72,10 @@ export function createHttpClient(config: Config) {
     Accept: "application/json",
   };
 
-  async function request(
+  async function attemptRequest(
     method: "GET" | "POST",
-    path: string,
-    params?: Params,
+    url: URL,
   ): Promise<Response> {
-    const url = new URL(path, config.YANDEX_METRICA_BASE_URL);
-
-    if (params) {
-      const sp = buildSearchParams(params);
-      sp.forEach((value, key) => url.searchParams.set(key, value));
-    }
-
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), config.YANDEX_METRICA_TIMEOUT_MS);
 
@@ -59,7 +89,8 @@ export function createHttpClient(config: Config) {
       if (!response.ok) {
         const body = await parseErrorBody(response);
         const message = buildErrorMessage(body, `HTTP ${response.status} ${response.statusText}`);
-        throw new YandexApiError(response.status, body.code, message, body.errors);
+        const retryAfter = parseRetryAfter(response);
+        throw new YandexApiError(response.status, body.code, message, body.errors, retryAfter);
       }
 
       return response;
@@ -72,6 +103,43 @@ export function createHttpClient(config: Config) {
     } finally {
       clearTimeout(timer);
     }
+  }
+
+  async function request(
+    method: "GET" | "POST",
+    path: string,
+    params?: Params,
+  ): Promise<Response> {
+    const url = new URL(path, config.YANDEX_METRICA_BASE_URL);
+    assertSafeHost(url);
+
+    if (params) {
+      const sp = buildSearchParams(params);
+      sp.forEach((value, key) => url.searchParams.set(key, value));
+    }
+
+    let lastError: unknown;
+
+    for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+      try {
+        return await attemptRequest(method, url);
+      } catch (err) {
+        lastError = err;
+
+        if (err instanceof YandexApiError && RETRYABLE_STATUSES.has(err.status)) {
+          if (attempt < MAX_RETRIES) {
+            const delay = err.retryAfter ?? backoffDelay(attempt);
+            await sleep(delay);
+            continue;
+          }
+        }
+
+        // Non-retryable or max retries reached
+        throw err;
+      }
+    }
+
+    throw lastError;
   }
 
   async function getJson<T>(path: string, params?: Params): Promise<T> {

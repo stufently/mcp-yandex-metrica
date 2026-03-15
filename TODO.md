@@ -8,7 +8,7 @@
 - [ ] Reporting API: bytime endpoint (`/stat/v1/data/bytime`)
 - [ ] Reporting API: pivot table endpoint
 - [ ] Logs API: streaming/chunked output for very large parts
-- [ ] Retry with exponential backoff for 429 and transient 5xx
+- [x] Retry with exponential backoff for 429 and transient 5xx
 - [ ] Publish to npm as CLI-installable package
 - [ ] Publish Docker image to GHCR on releases
 

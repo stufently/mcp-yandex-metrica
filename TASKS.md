@@ -1,6 +1,13 @@
 # Tasks
 
-## Completed — 2026-03-15
+## Completed — 2026-03-15 (security/reliability patch)
+
+| Task | Status |
+|------|--------|
+| Add `retryAfter` field to `YandexApiError` | Done |
+| Rewrite `http.ts`: SSRF guard, retry logic, `Retry-After` header | Done |
+
+## Completed — 2026-03-15 (initial)
 
 | Task | Status |
 |------|--------|
