@@ -1,6 +1,7 @@
 import { createHttpClient } from "./http.js";
 import type { Config } from "../config/env.js";
 import type { ReportResponse } from "../types/api.js";
+import { reportResponseSchema, validateResponse } from "../schemas/responses.js";
 
 export interface GetReportParams {
   ids: string;
@@ -26,7 +27,7 @@ export function createReportingClient(config: Config) {
   const http = createHttpClient(config);
 
   async function getReport(params: GetReportParams): Promise<ReportResponse> {
-    return http.getJson<ReportResponse>("/stat/v1/data", {
+    const raw = await http.getJson<unknown>("/stat/v1/data", {
       ids: params.ids,
       metrics: params.metrics,
       dimensions: params.dimensions,
@@ -45,6 +46,7 @@ export function createReportingClient(config: Config) {
       date2b: params.date2b,
       preset: params.preset,
     });
+    return validateResponse(reportResponseSchema, raw, "getReport") as unknown as ReportResponse;
   }
 
   return { getReport };

@@ -1,10 +1,12 @@
 import { createHttpClient } from "./http.js";
 import type { Config } from "../config/env.js";
-import type {
-  CountersResponse,
-  CounterResponse,
-  GoalsResponse,
-} from "../types/api.js";
+import type { CountersResponse, CounterResponse, GoalsResponse } from "../types/api.js";
+import {
+  countersResponseSchema,
+  counterResponseSchema,
+  goalsResponseSchema,
+  validateResponse,
+} from "../schemas/responses.js";
 
 export interface ListCountersParams {
   page?: number | undefined;
@@ -27,7 +29,7 @@ export function createManagementClient(config: Config) {
   const http = createHttpClient(config);
 
   async function listCounters(params: ListCountersParams): Promise<CountersResponse> {
-    return http.getJson<CountersResponse>("/management/v1/counters", {
+    const raw = await http.getJson<unknown>("/management/v1/counters", {
       page: params.page,
       per_page: params.per_page,
       status: params.status,
@@ -35,16 +37,19 @@ export function createManagementClient(config: Config) {
       search: params.search,
       sort: params.sort,
     });
+    return validateResponse(countersResponseSchema, raw, "listCounters") as unknown as CountersResponse;
   }
 
   async function getCounter(params: GetCounterParams): Promise<CounterResponse> {
-    return http.getJson<CounterResponse>(`/management/v1/counter/${params.counter_id}`);
+    const raw = await http.getJson<unknown>(`/management/v1/counter/${params.counter_id}`);
+    return validateResponse(counterResponseSchema, raw, "getCounter") as unknown as CounterResponse;
   }
 
   async function listGoals(params: ListGoalsParams): Promise<GoalsResponse> {
-    return http.getJson<GoalsResponse>(
+    const raw = await http.getJson<unknown>(
       `/management/v1/counter/${params.counter_id}/goals`,
     );
+    return validateResponse(goalsResponseSchema, raw, "listGoals") as unknown as GoalsResponse;
   }
 
   return { listCounters, getCounter, listGoals };

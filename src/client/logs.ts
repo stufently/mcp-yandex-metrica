@@ -6,6 +6,12 @@ import type {
   LogRequestEvaluationResponse,
   LogSource,
 } from "../types/api.js";
+import {
+  logRequestResponseSchema,
+  logRequestsResponseSchema,
+  logRequestEvaluationResponseSchema,
+  validateResponse,
+} from "../schemas/responses.js";
 
 export interface LogsRequestParams {
   counter_id: number;
@@ -47,7 +53,7 @@ export function createLogsClient(config: Config) {
   async function evaluateLogsRequest(
     params: LogsEvaluateParams,
   ): Promise<LogRequestEvaluationResponse> {
-    return http.getJson<LogRequestEvaluationResponse>(
+    const raw = await http.getJson<unknown>(
       `${base(params.counter_id)}/evaluate`,
       {
         date1: params.date1,
@@ -56,24 +62,44 @@ export function createLogsClient(config: Config) {
         fields: params.fields,
       },
     );
+    return validateResponse(
+      logRequestEvaluationResponseSchema,
+      raw,
+      "evaluateLogsRequest",
+    ) as unknown as LogRequestEvaluationResponse;
   }
 
   async function createLogsRequest(params: LogsRequestParams): Promise<LogRequestResponse> {
-    return http.postJson<LogRequestResponse>(base(params.counter_id), {
+    const raw = await http.postJson<unknown>(base(params.counter_id), {
       date1: params.date1,
       date2: params.date2,
       source: params.source,
       fields: params.fields,
       attribution: params.attribution,
     });
+    return validateResponse(
+      logRequestResponseSchema,
+      raw,
+      "createLogsRequest",
+    ) as unknown as LogRequestResponse;
   }
 
   async function listLogsRequests(counterId: number): Promise<LogRequestsResponse> {
-    return http.getJson<LogRequestsResponse>(base(counterId));
+    const raw = await http.getJson<unknown>(base(counterId));
+    return validateResponse(
+      logRequestsResponseSchema,
+      raw,
+      "listLogsRequests",
+    ) as unknown as LogRequestsResponse;
   }
 
   async function getLogsRequest(params: LogsRequestIdParams): Promise<LogRequestResponse> {
-    return http.getJson<LogRequestResponse>(req(params.counter_id, params.request_id));
+    const raw = await http.getJson<unknown>(req(params.counter_id, params.request_id));
+    return validateResponse(
+      logRequestResponseSchema,
+      raw,
+      "getLogsRequest",
+    ) as unknown as LogRequestResponse;
   }
 
   async function downloadLogsPart(params: DownloadLogsPartParams): Promise<Response> {
@@ -83,11 +109,25 @@ export function createLogsClient(config: Config) {
   }
 
   async function cancelLogsRequest(params: LogsRequestIdParams): Promise<LogRequestResponse> {
-    return http.postJson<LogRequestResponse>(`${req(params.counter_id, params.request_id)}/cancel`);
+    const raw = await http.postJson<unknown>(
+      `${req(params.counter_id, params.request_id)}/cancel`,
+    );
+    return validateResponse(
+      logRequestResponseSchema,
+      raw,
+      "cancelLogsRequest",
+    ) as unknown as LogRequestResponse;
   }
 
   async function cleanLogsRequest(params: LogsRequestIdParams): Promise<LogRequestResponse> {
-    return http.postJson<LogRequestResponse>(`${req(params.counter_id, params.request_id)}/clean`);
+    const raw = await http.postJson<unknown>(
+      `${req(params.counter_id, params.request_id)}/clean`,
+    );
+    return validateResponse(
+      logRequestResponseSchema,
+      raw,
+      "cleanLogsRequest",
+    ) as unknown as LogRequestResponse;
   }
 
   return {
