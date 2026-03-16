@@ -184,3 +184,16 @@ export interface LogRequestEvaluation {
 export interface LogRequestEvaluationResponse {
   log_request_evaluation: LogRequestEvaluation;
 }
+
+// Counter creation types
+
+export interface CreateCounterBody {
+  name: string;
+  site: string;
+  mirrors?: string[];
+  time_zone_name?: string;
+}
+
+export interface CreateCounterParams {
+  gdpr_agreement_accepted?: number;
+}

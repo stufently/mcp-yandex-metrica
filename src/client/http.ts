@@ -167,11 +167,89 @@ export function createHttpClient(config: Config) {
     }
   }
 
+  async function postJsonBody<T>(path: string, body: unknown, params?: Params): Promise<T> {
+    const url = new URL(path, config.YANDEX_METRICA_BASE_URL);
+    assertSafeHost(url);
+
+    if (params) {
+      const sp = buildSearchParams(params);
+      sp.forEach((value, key) => url.searchParams.set(key, value));
+    }
+
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), config.YANDEX_METRICA_TIMEOUT_MS);
+
+    try {
+      const response = await fetch(url.toString(), {
+        method: "POST",
+        headers: {
+          ...baseHeaders,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+        signal: controller.signal,
+      });
+
+      if (!response.ok) {
+        const errBody = await parseErrorBody(response);
+        const message = buildErrorMessage(errBody, `HTTP ${response.status} ${response.statusText}`);
+        const retryAfter = parseRetryAfter(response);
+        throw new YandexApiError(response.status, errBody.code, message, errBody.errors, retryAfter);
+      }
+
+      const text = await response.text();
+      try {
+        return JSON.parse(text) as T;
+      } catch {
+        throw new Error(`Failed to parse JSON response: ${text.slice(0, 200)}`);
+      }
+    } catch (err) {
+      if (err instanceof YandexApiError) throw err;
+      if (err instanceof Error && err.name === "AbortError") {
+        throw new Error(`Request timed out after ${config.YANDEX_METRICA_TIMEOUT_MS}ms`, { cause: err });
+      }
+      throw err;
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  async function deleteRequest(path: string): Promise<void> {
+    const url = new URL(path, config.YANDEX_METRICA_BASE_URL);
+    assertSafeHost(url);
+
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), config.YANDEX_METRICA_TIMEOUT_MS);
+
+    try {
+      const response = await fetch(url.toString(), {
+        method: "DELETE",
+        headers: baseHeaders,
+        signal: controller.signal,
+      });
+
+      if (!response.ok) {
+        const errBody = await parseErrorBody(response);
+        const message = buildErrorMessage(errBody, `HTTP ${response.status} ${response.statusText}`);
+        const retryAfter = parseRetryAfter(response);
+        throw new YandexApiError(response.status, errBody.code, message, errBody.errors, retryAfter);
+      }
+    } catch (err) {
+      if (err instanceof YandexApiError) throw err;
+      if (err instanceof Error && err.name === "AbortError") {
+        throw new Error(`Request timed out after ${config.YANDEX_METRICA_TIMEOUT_MS}ms`, { cause: err });
+      }
+      throw err;
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
   async function getRaw(path: string, params?: Params): Promise<Response> {
     return request("GET", path, params);
   }
 
-  return { getJson, postJson, getRaw };
+  return { getJson, postJson, postJsonBody, deleteRequest, getRaw };
 }
 
 export type HttpClient = ReturnType<typeof createHttpClient>;

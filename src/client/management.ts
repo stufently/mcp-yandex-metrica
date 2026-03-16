@@ -25,6 +25,18 @@ export interface ListGoalsParams {
   counter_id: number;
 }
 
+export interface CreateCounterParams {
+  name: string;
+  site: string;
+  mirrors?: string[];
+  time_zone_name?: string;
+  gdpr_agreement_accepted?: boolean;
+}
+
+export interface DeleteCounterParams {
+  counter_id: number;
+}
+
 export function createManagementClient(config: Config) {
   const http = createHttpClient(config);
 
@@ -52,5 +64,25 @@ export function createManagementClient(config: Config) {
     return validateResponse(goalsResponseSchema, raw, "listGoals") as unknown as GoalsResponse;
   }
 
-  return { listCounters, getCounter, listGoals };
+  async function createCounter(params: CreateCounterParams): Promise<CounterResponse> {
+    const body = {
+      counter: {
+        name: params.name,
+        site: params.site,
+        ...(params.mirrors && { mirrors: params.mirrors }),
+        ...(params.time_zone_name && { time_zone_name: params.time_zone_name }),
+      },
+    };
+    const queryParams = params.gdpr_agreement_accepted
+      ? { gdpr_agreement_accepted: 1 }
+      : undefined;
+    const raw = await http.postJsonBody<unknown>("/management/v1/counters", body, queryParams);
+    return validateResponse(counterResponseSchema, raw, "createCounter") as unknown as CounterResponse;
+  }
+
+  async function deleteCounter(params: DeleteCounterParams): Promise<void> {
+    await http.deleteRequest(`/management/v1/counter/${params.counter_id}`);
+  }
+
+  return { listCounters, getCounter, listGoals, createCounter, deleteCounter };
 }

@@ -11,6 +11,8 @@ import { registerGetLogsRequest } from "../tools/getLogsRequest.js";
 import { registerDownloadLogsPart } from "../tools/downloadLogsPart.js";
 import { registerCancelLogsRequest } from "../tools/cancelLogsRequest.js";
 import { registerCleanLogsRequest } from "../tools/cleanLogsRequest.js";
+import { registerCreateCounter } from "../tools/createCounter.js";
+import { registerDeleteCounter } from "../tools/deleteCounter.js";
 
 export function registerAllTools(server: McpServer, config: Config): void {
   registerListCounters(server, config);
@@ -24,4 +26,6 @@ export function registerAllTools(server: McpServer, config: Config): void {
   registerDownloadLogsPart(server, config);
   registerCancelLogsRequest(server, config);
   registerCleanLogsRequest(server, config);
+  registerCreateCounter(server, config);
+  registerDeleteCounter(server, config);
 }

@@ -20,3 +20,18 @@ export const getCounterSchema = z.object({
 export const listGoalsSchema = z.object({
   counter_id: counterId,
 });
+
+export const createCounterSchema = z.object({
+  name: z.string().describe("Counter name"),
+  site: z.string().describe('Site domain (e.g. "example.com")'),
+  mirrors: z.array(z.string()).optional().describe("Mirror domains"),
+  time_zone_name: z.string().optional().describe('Timezone (e.g. "Europe/Moscow")'),
+  gdpr_agreement_accepted: z
+    .boolean()
+    .optional()
+    .describe("GDPR agreement accepted (required for EU sites)"),
+});
+
+export const deleteCounterSchema = z.object({
+  counter_id: counterId,
+});

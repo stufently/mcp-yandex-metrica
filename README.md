@@ -19,7 +19,7 @@ This MCP server exposes both APIs as named tools that an LLM can call directly.
 
 ## Features
 
-- 11 MCP tools covering counters, goals, reporting, and full Logs API lifecycle
+- 13 MCP tools covering counter management, goals, reporting, and full Logs API lifecycle
 - Authentication via environment variable only (no interactive OAuth)
 - Minimal transformation — responses stay close to the Yandex API format
 - Safe download behavior: logs parts default to 50KB preview + metadata
@@ -32,12 +32,14 @@ This MCP server exposes both APIs as named tools that an LLM can call directly.
 
 ## Supported MCP Tools
 
-### Counter & Metadata
+### Counter Management
 | Tool | Description |
 |------|-------------|
 | `yandex_metrica_list_counters` | List accessible counters (tags) |
 | `yandex_metrica_get_counter` | Get counter details by ID |
 | `yandex_metrica_list_goals` | List goals for a counter |
+| `yandex_metrica_create_counter` | Create a new counter (add a site) |
+| `yandex_metrica_delete_counter` | Delete a counter permanently |
 
 ### Reporting API (aggregated)
 | Tool | Description |
@@ -329,7 +331,7 @@ src/
 
 ## Limitations
 
-- **Read-only** (plus Logs API lifecycle operations which don't mutate counter data)
+- **Mostly read-only** (plus counter create/delete and Logs API lifecycle operations)
 - **No comparison report tool** — use `yandex_metrica_get_report` with `date1b`/`date2b` params
 - **No drilldown/pivot/bytime tools** in v1 — planned for v0.2
 - **No caching** — every tool call hits the Yandex API
@@ -367,7 +369,7 @@ To publish, update `REGISTRY` and `IMAGE_NAME` in `docker.yml` or rely on `${{ g
 
 - Token is passed via environment variable only — never hardcoded
 - Token never appears in logs
-- No write operations against Yandex Metrica counters (Logs lifecycle operations only manage temporary export jobs)
+- Counter create/delete requires `metrika:write` scope; all other tools use read-only access
 - Docker image runs as non-root (`node` user)
 
 ---

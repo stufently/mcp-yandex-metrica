@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+- `yandex_metrica_create_counter` tool — create new counters (add sites) via Management API
+- `yandex_metrica_delete_counter` tool — delete counters via Management API
+- HTTP client: `postJsonBody` method for POST with JSON body
+- HTTP client: `deleteRequest` method for DELETE requests
+- Counter schemas: `createCounterSchema`, `deleteCounterSchema`
+- Management client: `createCounter`, `deleteCounter` methods
+
 ### Fixed
 - ESLint: added Node.js/Web globals (`fetch`, `URL`, `AbortController`, `TextDecoder`, etc.) — lint now passes cleanly
 - HTTP client: POST requests no longer retried (only GET); prevents duplicate `createLogsRequest` on transient 5xx
